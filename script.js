@@ -7,6 +7,15 @@ const dayInput = document.getElementById('day');
 const timeInput = document.getElementById('time');
 const roomInput = document.getElementById('room');
 
+// Auto-format time input to HH:MM
+timeInput.addEventListener('input', function(e) {
+    let value = e.target.value.replace(/[^0-9]/g, ''); // Remove non-digits
+    if (value.length >= 3) {
+        value = value.slice(0, 2) + ':' + value.slice(2, 4);
+    }
+    e.target.value = value;
+});
+
 // Constants
 const STORAGE_KEY = 'schedules';
 const DAYS_ORDER = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
@@ -24,12 +33,13 @@ function loadSchedules() {
 
     scheduleList.innerHTML = '';
     schedules.forEach((schedule, index) => {
+        const timeFormatted = new Date(`1970-01-01T${schedule.time}:00`).toLocaleTimeString('en-GB', { hour12: false });
         const li = document.createElement('li');
         li.innerHTML = `
             <div>
                 <strong>${schedule.course}</strong><br>
                 Dosen: ${schedule.instructor}<br>
-                Hari: ${schedule.day}, Waktu: ${schedule.time}<br>
+                Hari: ${schedule.day}, Waktu: ${timeFormatted}<br>
                 Ruangan: ${schedule.room}
             </div>
             <div>
@@ -46,15 +56,26 @@ function saveSchedules(schedules) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(schedules));
 }
 
+// Function to validate time format HH:MM
+function isValidTime(time) {
+    const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    return timeRegex.test(time);
+}
+
 // Add or update schedule
 scheduleForm.addEventListener('submit', function(e) {
     e.preventDefault();
+    const timeValue = timeInput.value.trim();
+    if (!isValidTime(timeValue)) {
+        alert('Waktu harus dalam format 24 jam HH:MM (contoh: 14:30)');
+        return;
+    }
     const schedules = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
     const newSchedule = {
         course: courseInput.value.trim(),
         instructor: instructorInput.value.trim(),
         day: dayInput.value,
-        time: timeInput.value,
+        time: timeValue,
         room: roomInput.value.trim()
     };
 
