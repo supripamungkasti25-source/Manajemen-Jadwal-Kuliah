@@ -9,14 +9,34 @@
 <body>
     <h1>Manajemen Jadwal Kuliah</h1>
     <form id="scheduleForm">
+        <label for="course">Nama Mata Kuliah:</label>
         <input type="text" id="course" placeholder="Nama Mata Kuliah" required>
+
+        <label for="instructor">Dosen:</label>
         <input type="text" id="instructor" placeholder="Dosen" required>
-        <input type="text" id="day" placeholder="Hari (contoh: Senin)" required>
-        <input type="text" id="time" placeholder="Waktu (contoh: 10:00 AM)" required>
+
+        <label for="day">Hari:</label>
+        <select id="day" required>
+            <option value="">Pilih Hari</option>
+            <option value="Senin">Senin</option>
+            <option value="Selasa">Selasa</option>
+            <option value="Rabu">Rabu</option>
+            <option value="Kamis">Kamis</option>
+            <option value="Jumat">Jumat</option>
+            <option value="Sabtu">Sabtu</option>
+            <option value="Minggu">Minggu</option>
+        </select>
+
+        <label for="time">Waktu:</label>
+        <input type="time" id="time" required>
+
+        <label for="room">Ruangan:</label>
         <input type="text" id="room" placeholder="Ruangan" required>
+
         <button type="submit">Tambah Jadwal</button>
     </form>
-    <ul id="scheduleList"></ul>
-    <script src="Apk.js"></script>
+        <ul id="scheduleList"></ul>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
