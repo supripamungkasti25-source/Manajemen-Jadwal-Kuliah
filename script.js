@@ -7,17 +7,34 @@ const dayInput = document.getElementById('day');
 const timeInput = document.getElementById('time');
 const roomInput = document.getElementById('room');
 
+// Constants
+const STORAGE_KEY = 'schedules';
+const DAYS_ORDER = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+
 // Load schedules from localStorage
 function loadSchedules() {
-    const schedules = JSON.parse(localStorage.getItem('schedules')) || [];
+    const schedules = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    // Sort schedules by day and time
+    schedules.sort((a, b) => {
+        const dayA = DAYS_ORDER.indexOf(a.day);
+        const dayB = DAYS_ORDER.indexOf(b.day);
+        if (dayA !== dayB) return dayA - dayB;
+        return a.time.localeCompare(b.time);
+    });
+
     scheduleList.innerHTML = '';
     schedules.forEach((schedule, index) => {
         const li = document.createElement('li');
         li.innerHTML = `
-            <span>${schedule.course} - ${schedule.instructor} - ${schedule.day} - ${schedule.time} - ${schedule.room}</span>
+            <div>
+                <strong>${schedule.course}</strong><br>
+                Dosen: ${schedule.instructor}<br>
+                Hari: ${schedule.day}, Waktu: ${schedule.time}<br>
+                Ruangan: ${schedule.room}
+            </div>
             <div>
                 <button class="edit-btn" onclick="editSchedule(${index})">Edit</button>
-                <button class="delete-btn" onclick="deleteSchedule(${index})">Delete</button>
+                <button class="delete-btn" onclick="deleteSchedule(${index})">Hapus</button>
             </div>
         `;
         scheduleList.appendChild(li);
@@ -26,19 +43,19 @@ function loadSchedules() {
 
 // Save schedules to localStorage
 function saveSchedules(schedules) {
-    localStorage.setItem('schedules', JSON.stringify(schedules));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(schedules));
 }
 
 // Add or update schedule
 scheduleForm.addEventListener('submit', function(e) {
     e.preventDefault();
-    const schedules = JSON.parse(localStorage.getItem('schedules')) || [];
+    const schedules = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
     const newSchedule = {
-        course: courseInput.value,
-        instructor: instructorInput.value,
+        course: courseInput.value.trim(),
+        instructor: instructorInput.value.trim(),
         day: dayInput.value,
         time: timeInput.value,
-        room: roomInput.value
+        room: roomInput.value.trim()
     };
 
     if (scheduleForm.dataset.editingIndex !== undefined) {
@@ -46,7 +63,7 @@ scheduleForm.addEventListener('submit', function(e) {
         const index = parseInt(scheduleForm.dataset.editingIndex);
         schedules[index] = newSchedule;
         delete scheduleForm.dataset.editingIndex;
-        scheduleForm.querySelector('button').textContent = 'Add Schedule';
+        scheduleForm.querySelector('button').textContent = 'Tambah Jadwal';
     } else {
         // Create new
         schedules.push(newSchedule);
@@ -59,7 +76,7 @@ scheduleForm.addEventListener('submit', function(e) {
 
 // Edit schedule
 function editSchedule(index) {
-    const schedules = JSON.parse(localStorage.getItem('schedules')) || [];
+    const schedules = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
     const schedule = schedules[index];
     courseInput.value = schedule.course;
     instructorInput.value = schedule.instructor;
@@ -67,15 +84,17 @@ function editSchedule(index) {
     timeInput.value = schedule.time;
     roomInput.value = schedule.room;
     scheduleForm.dataset.editingIndex = index;
-    scheduleForm.querySelector('button').textContent = 'Update Schedule';
+    scheduleForm.querySelector('button').textContent = 'Perbarui Jadwal';
 }
 
 // Delete schedule
 function deleteSchedule(index) {
-    const schedules = JSON.parse(localStorage.getItem('schedules')) || [];
-    schedules.splice(index, 1);
-    saveSchedules(schedules);
-    loadSchedules();
+    if (confirm('Apakah Anda yakin ingin menghapus jadwal ini?')) {
+        const schedules = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        schedules.splice(index, 1);
+        saveSchedules(schedules);
+        loadSchedules();
+    }
 }
 
 // Load schedules on page load
